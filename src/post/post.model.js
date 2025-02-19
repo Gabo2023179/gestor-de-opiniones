@@ -1,36 +1,37 @@
 import { Schema, model } from 'mongoose';
 
-const postSchema = new Schema({
-    title:{
-        type: String,
-        required: [true, "Title is required"],
-        maxLength: [15, "Title cannot exceed 15 characters"]
+const postSchema = new Schema(
+  {
+    title: {
+      type: String,
+      required: [true, "Title is required"],
+      trim: true
     },
-    category:{
-        type: String,
-        required: [true, "Category is required"],
-        maxLength: [15, "Category cannot exceed 15 characters"]
-
+    category: {
+      type: String,
+      required: [true, "Category is required"],
+      trim: true
     },
-    text:{
-        type: String,
-        required: [true, "The principal text is required"],
-        maxLength: [500, "The principal text cannot exceed 500 characters"]
-
+    content: {
+      type: String,
+      required: [true, "Content is required"]
     },
-    status:{
-        type: Boolean,
-        default: true
+    author: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true
     }
+  },
+  {
+    timestamps: true,
+    versionKey: false
+  }
+);
 
-},
-{
-    versionKey: false,
-    timeStamps: true
-})
-
-postSchema.methods.toJson = function(){
-    const {_id, ...usuario} = this.toObject()
-    usuario.uid = _id
-    return usuario
+postSchema.methods.toJSON = function(){
+    const {_id, ...publi} = this.toObject()
+    publi.uid = _id
+    return publi
 }
+
+export default model("Post", postSchema);
