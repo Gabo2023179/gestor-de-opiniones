@@ -1,56 +1,61 @@
 import { Schema, model } from 'mongoose';
 
 const userSchema = new Schema({
-    name:{
+    name: {
         type: String,
         required: [true, "Name is required"],
         maxLength: [25, "Name cannot exceed 25 characters"]
     },
-    surname:{
+    surname: {
         type: String,
         required: [true, "Surname is required"],
         maxLength: [25, "Surname cannot exceed 25 characters"]
     },
-    username:{
+    username: {
         type: String,
         required: true,
-        unique:true
+        unique: true,
+        trim: true, // 🔹 Elimina espacios innecesarios
+        lowercase: true // 🔹 Convierte a minúsculas automáticamente
     },
-    email:{
+    email: {
         type: String,
         required: [true, "Email is required"],
-        unique: true
+        unique: true,
+        trim: true, // 🔹 Elimina espacios innecesarios
+        lowercase: true // 🔹 Convierte a minúsculas automáticamente
     },
-    password:{
+    password: {
         type: String,
         required: [true, "Password is required"]
     },
-    phone:{
+    phone: {
         type: String,
+        required: true,
         minLength: 8,
         maxLength: 8,
-        required: true
+        match: /^[0-9]{8}$/ // 🔹 Solo permite números
     },
-    role:{
+    role: {
         type: String,
         required: true,
         enum: ["ADMIN", "CLIENT"]
     },
-    status:{
+    status: {
         type: Boolean,
         default: true
     }
 },
 {
     versionKey: false,
-    timeStamps: true
-})
+    timestamps: true // 🔹 Corrección de `timeStamps` a `timestamps`
+});
 
+// 🔹 Ocultar contraseña y renombrar `_id` a `uid`
 userSchema.methods.toJSON = function(){
-    const {password, _id, ...usuario} = this.toObject()
-    usuario.uid = _id
-    return usuario
-}
+    const { password, _id, ...usuario } = this.toObject();
+    usuario.uid = _id;
+    return usuario;
+};
 
-
-export default model("User", userSchema)
+export default model("User", userSchema);

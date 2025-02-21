@@ -9,6 +9,7 @@ import authRoutes from "../src/auth/auth.routes.js" // Rutas de autenticación
 import userRoutes from "../src/user/user.routes.js" // Rutas de gestión de usuarios
 import postRoutes from "../src/post/post.routes.js"
 import commentRoutes from "../src/comments/comment.routes.js"
+import categoryRoutes from "../src/category/category.routes.js"
 import apiLimiter from "../src/middlewares/rate-limit-validator.js" // Middleware para limitar las solicitudes por usuario
 
 const middlewares = (app) => {
@@ -26,6 +27,7 @@ const routes = (app) => {
     app.use("/gestorOp/v1/user", userRoutes);
     app.use("/gestorOp/v1/posts", postRoutes);
     app.use("/gestorOp/v1/comments", commentRoutes);
+    app.use("/gestorOp/v1/category", categoryRoutes);
 
 }
 

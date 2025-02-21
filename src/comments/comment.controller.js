@@ -1,18 +1,15 @@
-// src/comment/comment.controller.js
 import Comment from "./comment.model.js";
-import Post from "../post/post.model.js";
 
+/**
+ * Crea un nuevo comentario.
+ * Se asume que:
+ * - La validación del token se realizó previamente (validateJWT).
+ * - Se verificó la existencia del post mediante middleware (por ejemplo, validatePostExists).
+ * - Las validaciones de datos se han hecho en los validadores (commentValidator).
+ */
 export const createComment = async (req, res) => {
   try {
     const { postId, text } = req.body;
-    // Verificar que la publicación exista
-    const post = await Post.findById(postId);
-    if (!post) {
-      return res.status(404).json({
-        success: false,
-        message: "Post not found"
-      });
-    }
     const author = req.usuario._id;
     const comment = new Comment({ text, post: postId, author });
     await comment.save();
@@ -30,6 +27,10 @@ export const createComment = async (req, res) => {
   }
 };
 
+/**
+ * Actualiza un comentario.
+ * Solo el autor del comentario (según el token) puede editarlo.
+ */
 export const updateComment = async (req, res) => {
   try {
     const { commentId } = req.params;
@@ -40,7 +41,7 @@ export const updateComment = async (req, res) => {
         message: "Comment not found"
       });
     }
-    // Solo el autor puede editar su comentario
+    // Se comprueba que el usuario autenticado sea el autor
     if (comment.author.toString() !== req.usuario._id.toString()) {
       return res.status(401).json({
         success: false,
@@ -64,6 +65,10 @@ export const updateComment = async (req, res) => {
   }
 };
 
+/**
+ * Elimina un comentario.
+ * Solo el autor del comentario (según el token) puede eliminarlo.
+ */
 export const deleteComment = async (req, res) => {
   try {
     const { commentId } = req.params;
@@ -74,7 +79,6 @@ export const deleteComment = async (req, res) => {
         message: "Comment not found"
       });
     }
-    // Solo el autor puede eliminar su comentario
     if (comment.author.toString() !== req.usuario._id.toString()) {
       return res.status(401).json({
         success: false,
@@ -95,10 +99,14 @@ export const deleteComment = async (req, res) => {
   }
 };
 
+/**
+ * Obtiene todos los comentarios asociados a un post.
+ */
 export const getCommentsByPost = async (req, res) => {
   try {
     const { postId } = req.params;
-    const comments = await Comment.find({ post: postId }).populate('author', 'username name');
+    const comments = await Comment.find({ post: postId })
+      .populate("author", "username name");
     res.status(200).json({
       success: true,
       comments

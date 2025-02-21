@@ -1,17 +1,23 @@
-// src/post/post.controller.js
 import Post from "./post.model.js";
+import { updatePostFields } from "../helpers/post-helper.js";
 
+/**
+ * Crea una nueva publicación.
+ */
 export const createPost = async (req, res) => {
   try {
-    const data = req.body;
-    const usuario = req.usuario._id; // Se obtiene desde el middleware de JWT
-    const post = new Post(data);
+    const { title, category, content } = req.body;
+    const author = req.usuario._id;
+
+    const post = new Post({ title, category, content, author });
     await post.save();
+
     res.status(201).json({
       success: true,
       message: "Post created successfully",
-      post
+      post: post.toJSON()
     });
+
   } catch (err) {
     res.status(500).json({
       success: false,
@@ -21,13 +27,17 @@ export const createPost = async (req, res) => {
   }
 };
 
+/**
+ * Obtiene todas las publicaciones.
+ */
 export const getPosts = async (req, res) => {
   try {
-    const posts = await Post.find().populate('author', 'username name');
+    const posts = await Post.find().populate("author", "username name");
     res.status(200).json({
       success: true,
-      posts
+      posts: posts.map(post => post.toJSON())
     });
+
   } catch (err) {
     res.status(500).json({
       success: false,
@@ -37,20 +47,26 @@ export const getPosts = async (req, res) => {
   }
 };
 
+/**
+ * Obtiene una publicación por ID.
+ */
 export const getPostById = async (req, res) => {
   try {
     const { postId } = req.params;
-    const post = await Post.findById(postId).populate('author', 'username name');
+    const post = await Post.findById(postId).populate("author", "username name");
+
     if (!post) {
       return res.status(404).json({
         success: false,
         message: "Post not found"
       });
     }
+
     res.status(200).json({
       success: true,
-      post
+      post: post.toJSON()
     });
+
   } catch (err) {
     res.status(500).json({
       success: false,
@@ -60,33 +76,32 @@ export const getPostById = async (req, res) => {
   }
 };
 
+/**
+ * Actualiza una publicación.
+ */
 export const updatePost = async (req, res) => {
   try {
     const { postId } = req.params;
-    const post = await Post.findById(postId);
-    if (!post) {
+    const updatedPost = await Post.findById(postId);
+
+    if (!updatedPost) {
       return res.status(404).json({
         success: false,
         message: "Post not found"
       });
     }
-    // Solo el autor puede editar su propia publicación
-    if (post.author.toString() !== req.usuario._id.toString()) {
-      return res.status(401).json({
-        success: false,
-        message: "Not authorized to update this post"
-      });
+
+    // Usamos el helper para actualizar solo si hay cambios
+    if (updatePostFields(updatedPost, req.body)) {
+      await updatedPost.save();
     }
-    const { title, category, content } = req.body;
-    if (title) post.title = title;
-    if (category) post.category = category;
-    if (content) post.content = content;
-    await post.save();
+
     res.status(200).json({
       success: true,
       message: "Post updated successfully",
-      post
+      post: updatedPost.toJSON()
     });
+
   } catch (err) {
     res.status(500).json({
       success: false,
@@ -96,28 +111,27 @@ export const updatePost = async (req, res) => {
   }
 };
 
+
+/**
+ * Elimina una publicación.
+ */
 export const deletePost = async (req, res) => {
   try {
     const { postId } = req.params;
-    const post = await Post.findById(postId);
+    const post = await Post.findByIdAndDelete(postId);
+
     if (!post) {
       return res.status(404).json({
         success: false,
         message: "Post not found"
       });
     }
-    // Solo el autor puede eliminar su propia publicación
-    if (post.author.toString() !== req.usuario._id.toString()) {
-      return res.status(401).json({
-        success: false,
-        message: "Not authorized to delete this post"
-      });
-    }
-    await post.remove();
+
     res.status(200).json({
       success: true,
       message: "Post deleted successfully"
     });
+
   } catch (err) {
     res.status(500).json({
       success: false,
