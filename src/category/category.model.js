@@ -5,9 +5,8 @@ const categorySchema = new Schema(
     name: {
       type: String,
       required: [true, "Category name is required"],
-      unique: true, // Asegurar que no haya duplicados
       trim: true,
-      lowercase: true, // Evita nombres duplicados con diferente capitalización
+      lowercase: true, // Normaliza el texto a minúsculas para evitar duplicados con mayúsculas
       maxLength: [50, "Category name cannot exceed 50 characters"]
     },
     description: {
@@ -17,11 +16,11 @@ const categorySchema = new Schema(
     }
   },
   {
-    timestamps: true // Agrega createdAt y updatedAt automáticamente
+    timestamps: true
   }
 );
 
-// Asegurar unicidad real a nivel de base de datos
+// ✅ Mantén el índice único aquí, eliminando `unique: true` dentro del campo name
 categorySchema.index({ name: 1 }, { unique: true });
 
 export default model("Category", categorySchema);

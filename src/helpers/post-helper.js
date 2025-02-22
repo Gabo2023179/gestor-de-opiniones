@@ -1,4 +1,5 @@
-import Post from "./post.model.js";
+import Post from "../post/post.model.js";  
+
 
 /**
  * Verifica si un post existe en la base de datos por su ID.

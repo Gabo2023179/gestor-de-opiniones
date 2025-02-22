@@ -11,6 +11,7 @@ import postRoutes from "../src/post/post.routes.js"
 import commentRoutes from "../src/comments/comment.routes.js"
 import categoryRoutes from "../src/category/category.routes.js"
 import apiLimiter from "../src/middlewares/rate-limit-validator.js" // Middleware para limitar las solicitudes por usuario
+import { swaggerDocs, swaggerUi } from "./swagger.js";
 
 const middlewares = (app) => {
     app.use(express.urlencoded({extended: false})) // Permite el análisis de datos codificados en URL
@@ -28,6 +29,7 @@ const routes = (app) => {
     app.use("/gestorOp/v1/posts", postRoutes);
     app.use("/gestorOp/v1/comments", commentRoutes);
     app.use("/gestorOp/v1/category", categoryRoutes);
+    app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 }
 
